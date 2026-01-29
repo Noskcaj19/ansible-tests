@@ -9,26 +9,34 @@
         - "{{ role_path }}/vars"
       skip: true
 
+- name: Set OS type fact
+  ansible.builtin.set_fact:
+    _vector_os_type: "{{ 'windows' if ansible_os_family == 'Windows' else 'linux' }}"
+
 - name: Install Vector
-  ansible.builtin.include_tasks: "install_{{ 'windows' if ansible_os_family == 'Windows' else 'linux' }}.yml"
+  ansible.builtin.include_tasks:
+    file: "install_{{ _vector_os_type }}.yml"
   tags:
     - vector
     - vector_install
 
 - name: Configure Vector
-  ansible.builtin.include_tasks: "configure_{{ 'windows' if ansible_os_family == 'Windows' else 'linux' }}.yml"
+  ansible.builtin.include_tasks:
+    file: "configure_{{ _vector_os_type }}.yml"
   tags:
     - vector
     - vector_configure
 
 - name: Manage Vector service
-  ansible.builtin.include_tasks: "service_{{ 'windows' if ansible_os_family == 'Windows' else 'linux' }}.yml"
+  ansible.builtin.include_tasks:
+    file: "service_{{ _vector_os_type }}.yml"
   tags:
     - vector
     - vector_service
 
 - name: Validate Vector
-  ansible.builtin.include_tasks: "validate_{{ 'windows' if ansible_os_family == 'Windows' else 'linux' }}.yml"
+  ansible.builtin.include_tasks:
+    file: "validate_{{ _vector_os_type }}.yml"
   tags:
     - vector
     - vector_validate

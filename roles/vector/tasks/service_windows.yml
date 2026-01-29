@@ -6,7 +6,7 @@
 
 - name: Install Vector service
   ansible.windows.win_command:
-    cmd: '"{{ vector_bin_path }}" service install --config "{{ vector_config_file }}"'
+    cmd: '"{{ vector_bin_path }}" service install --config-dir "{{ vector_config_dir }}"'
   when: not vector_service_info.exists
   notify: Restart vector
 

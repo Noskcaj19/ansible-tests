@@ -10,5 +10,5 @@
 
 - name: Verify Vector can parse its configuration
   ansible.builtin.command:
-    cmd: "/usr/local/bin/vector validate {{ vector_config_file }}"
+    cmd: "/usr/local/bin/vector validate --config-dir {{ vector_config_dir }}"
   changed_when: false

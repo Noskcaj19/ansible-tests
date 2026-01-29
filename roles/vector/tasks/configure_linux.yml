@@ -30,5 +30,9 @@
     owner: root
     group: "{{ vector_group }}"
     mode: "0640"
-    validate: "/usr/local/bin/vector validate %s"
   notify: Restart vector
+
+- name: Validate Vector configuration
+  ansible.builtin.command:
+    cmd: "{{ vector_bin_path }} validate --config-dir {{ vector_config_dir }}"
+  changed_when: false
