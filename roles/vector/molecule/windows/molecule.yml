@@ -1,0 +1,37 @@
+---
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml
+
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+
+platforms:
+  - name: windows2022
+    box: gusztavvargadr/windows-server-2022-standard
+    memory: 4096
+    cpus: 2
+    groups:
+      - windows
+
+provisioner:
+  name: ansible
+  playbooks:
+    converge: converge.yml
+    verify: verify.yml
+  connection_options:
+    ansible_user: vagrant
+    ansible_password: vagrant
+    ansible_connection: winrm
+    ansible_winrm_transport: basic
+    ansible_winrm_server_cert_validation: ignore
+    ansible_shell_type: powershell
+    ansible_become: false
+  env:
+    ANSIBLE_HOST_KEY_CHECKING: "false"
+
+verifier:
+  name: ansible

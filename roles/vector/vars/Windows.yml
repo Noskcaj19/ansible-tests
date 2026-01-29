@@ -1,0 +1,10 @@
+---
+# Windows-specific path overrides
+vector_bin_path: "C:\\Program Files\\Vector\\bin\\vector.exe"
+vector_config_dir: "C:\\Program Files\\Vector\\config"
+vector_config_file: "{{ vector_config_dir }}\\vector.yaml"
+vector_data_dir: "C:\\ProgramData\\Vector"
+
+# Windows doesn't support these sources
+vector_sources_journald_enabled: false
+vector_sources_docker_enabled: false

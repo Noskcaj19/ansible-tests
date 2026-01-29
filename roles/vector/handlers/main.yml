@@ -1,17 +1,43 @@
 ---
-- name: Restart vector
+- name: Restart vector (Linux)
   ansible.builtin.systemd:
     name: "{{ vector_service_name }}"
     state: restarted
     daemon_reload: true
-  when: vector_service_state != 'stopped'
+  when:
+    - ansible_os_family != 'Windows'
+    - vector_service_state != 'stopped'
+  listen: Restart vector
 
-- name: Reload vector
+- name: Restart vector (Windows)
+  ansible.windows.win_service:
+    name: "{{ vector_service_name }}"
+    state: restarted
+  when:
+    - ansible_os_family == 'Windows'
+    - vector_service_state != 'stopped'
+  listen: Restart vector
+
+- name: Reload vector (Linux)
   ansible.builtin.systemd:
     name: "{{ vector_service_name }}"
     state: reloaded
-  when: vector_service_state != 'stopped'
+  when:
+    - ansible_os_family != 'Windows'
+    - vector_service_state != 'stopped'
+  listen: Reload vector
+
+- name: Reload vector (Windows)
+  ansible.windows.win_service:
+    name: "{{ vector_service_name }}"
+    state: restarted
+  when:
+    - ansible_os_family == 'Windows'
+    - vector_service_state != 'stopped'
+  listen: Reload vector
 
 - name: Reload systemd
   ansible.builtin.systemd:
     daemon_reload: true
+  when: ansible_os_family != 'Windows'
+  listen: Reload systemd

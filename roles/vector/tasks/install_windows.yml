@@ -1,0 +1,49 @@
+---
+- name: Validate vector_version is set for Windows
+  ansible.builtin.assert:
+    that:
+      - vector_version | length > 0
+    fail_msg: "vector_version is required on Windows (MSI URL needs explicit version)"
+
+- name: Check if Vector is installed
+  ansible.windows.win_stat:
+    path: "{{ vector_bin_path }}"
+  register: vector_binary
+
+- name: Get installed Vector version
+  ansible.windows.win_command:
+    cmd: '"{{ vector_bin_path }}" --version'
+  register: vector_version_output
+  changed_when: false
+  when: vector_binary.stat.exists
+
+- name: Set installed Vector version fact
+  ansible.builtin.set_fact:
+    vector_installed_version: "{{ vector_version_output.stdout | regex_search('vector ([0-9.]+)', '\\1') | first | default('') }}"
+  when: vector_binary.stat.exists
+
+- name: Install Vector
+  when: not vector_binary.stat.exists or vector_installed_version != vector_version
+  block:
+    - name: Ensure temp directory exists
+      ansible.windows.win_file:
+        path: "{{ ansible_env.TEMP }}\\vector"
+        state: directory
+
+    - name: Download Vector MSI
+      ansible.windows.win_get_url:
+        url: "https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-x64.msi"
+        dest: "{{ ansible_env.TEMP }}\\vector\\vector-{{ vector_version }}-x64.msi"
+      register: vector_msi_download
+
+    - name: Install Vector MSI
+      ansible.windows.win_package:
+        path: "{{ vector_msi_download.dest }}"
+        state: present
+      register: vector_install_result
+      notify: Restart vector
+
+    - name: Clean up MSI installer
+      ansible.windows.win_file:
+        path: "{{ ansible_env.TEMP }}\\vector"
+        state: absent

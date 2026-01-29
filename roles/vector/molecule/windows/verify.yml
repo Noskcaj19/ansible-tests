@@ -1,0 +1,37 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Check Vector binary exists
+      ansible.windows.win_stat:
+        path: "C:\\Program Files\\Vector\\bin\\vector.exe"
+      register: vector_binary
+      failed_when: not vector_binary.stat.exists
+
+    - name: Check Vector version
+      ansible.windows.win_command:
+        cmd: '"C:\Program Files\Vector\bin\vector.exe" --version'
+      register: vector_version_check
+      changed_when: false
+
+    - name: Display Vector version
+      ansible.builtin.debug:
+        var: vector_version_check.stdout
+
+    - name: Check Vector configuration exists
+      ansible.windows.win_stat:
+        path: "C:\\Program Files\\Vector\\config\\vector.yaml"
+      register: vector_config
+      failed_when: not vector_config.stat.exists
+
+    - name: Check Vector service is running
+      ansible.windows.win_service_info:
+        name: vector
+      register: vector_service
+      failed_when: vector_service.services[0].state != 'started'
+
+    - name: Validate Vector configuration
+      ansible.windows.win_command:
+        cmd: '"C:\Program Files\Vector\bin\vector.exe" validate "C:\Program Files\Vector\config\vector.yaml"'
+      changed_when: false

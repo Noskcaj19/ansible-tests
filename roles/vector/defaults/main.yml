@@ -6,7 +6,8 @@ vector_package_name: vector
 # Installation method (uses official Vector installer script from sh.vector.dev)
 vector_installer_url: "https://sh.vector.dev"
 
-# Paths
+# Paths (Linux defaults, Windows overrides in vars/Windows.yml)
+vector_bin_path: /usr/local/bin/vector
 vector_config_dir: /etc/vector
 vector_config_file: "{{ vector_config_dir }}/vector.yaml"
 vector_data_dir: /var/lib/vector

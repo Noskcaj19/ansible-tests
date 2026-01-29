@@ -1,0 +1,17 @@
+---
+- name: Check if Vector service exists
+  ansible.windows.win_service_info:
+    name: "{{ vector_service_name }}"
+  register: vector_service_info
+
+- name: Install Vector service
+  ansible.windows.win_command:
+    cmd: '"{{ vector_bin_path }}" service install --config "{{ vector_config_file }}"'
+  when: not vector_service_info.exists
+  notify: Restart vector
+
+- name: Ensure Vector service is configured
+  ansible.windows.win_service:
+    name: "{{ vector_service_name }}"
+    start_mode: "{{ 'auto' if vector_service_enabled else 'disabled' }}"
+    state: "{{ vector_service_state }}"

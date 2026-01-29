@@ -1,24 +1,34 @@
 ---
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_os_family }}.yml"
+        - "default.yml"
+      paths:
+        - "{{ role_path }}/vars"
+      skip: true
+
 - name: Install Vector
-  ansible.builtin.import_tasks: install.yml
+  ansible.builtin.include_tasks: "install_{{ 'windows' if ansible_os_family == 'Windows' else 'linux' }}.yml"
   tags:
     - vector
     - vector_install
 
 - name: Configure Vector
-  ansible.builtin.import_tasks: configure.yml
+  ansible.builtin.include_tasks: "configure_{{ 'windows' if ansible_os_family == 'Windows' else 'linux' }}.yml"
   tags:
     - vector
     - vector_configure
 
 - name: Manage Vector service
-  ansible.builtin.import_tasks: service.yml
+  ansible.builtin.include_tasks: "service_{{ 'windows' if ansible_os_family == 'Windows' else 'linux' }}.yml"
   tags:
     - vector
     - vector_service
 
 - name: Validate Vector
-  ansible.builtin.import_tasks: validate.yml
+  ansible.builtin.include_tasks: "validate_{{ 'windows' if ansible_os_family == 'Windows' else 'linux' }}.yml"
   tags:
     - vector
     - vector_validate

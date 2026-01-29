@@ -1,0 +1,13 @@
+---
+- name: Check Vector service is running
+  ansible.windows.win_service_info:
+    name: "{{ vector_service_name }}"
+  register: _vector_service_status
+  failed_when: 
+    - vector_service_state == 'started'
+    - _vector_service_status.services[0].state != 'started'
+
+- name: Verify Vector can parse its configuration
+  ansible.windows.win_command:
+    cmd: '"{{ vector_bin_path }}" validate "{{ vector_config_file }}"'
+  changed_when: false
