@@ -5,18 +5,17 @@
   gather_facts: true
 
   tasks:
-    - name: Check Vector package is installed
-      ansible.builtin.package:
-        name: vector
-        state: present
-      check_mode: true
-      register: _pkg_check
+    - name: Check Vector binary is installed
+      ansible.builtin.stat:
+        path: /usr/local/bin/vector
+      register: _binary_stat
 
-    - name: Verify package installation
+    - name: Verify binary installation
       ansible.builtin.assert:
         that:
-          - not _pkg_check.changed
-        fail_msg: "Vector package is not installed"
+          - _binary_stat.stat.exists
+          - _binary_stat.stat.executable
+        fail_msg: "Vector binary is not installed at /usr/local/bin/vector"
 
     - name: Check Vector service is running
       ansible.builtin.systemd:
@@ -46,13 +45,13 @@
 
     - name: Validate Vector configuration
       ansible.builtin.command:
-        cmd: vector validate --config /etc/vector/vector.yaml
+        cmd: /usr/local/bin/vector validate /etc/vector/vector.yaml
       register: _validation_result
       changed_when: false
 
     - name: Verify Vector binary works
       ansible.builtin.command:
-        cmd: vector --version
+        cmd: /usr/local/bin/vector --version
       register: _version_result
       changed_when: false
 

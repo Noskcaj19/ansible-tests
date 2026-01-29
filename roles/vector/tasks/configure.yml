@@ -30,5 +30,5 @@
     owner: root
     group: "{{ vector_group }}"
     mode: "0640"
-    validate: "vector validate --config %s"
+    validate: "/usr/local/bin/vector validate %s"
   notify: Restart vector

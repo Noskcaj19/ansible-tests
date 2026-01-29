@@ -1,6 +1,7 @@
 ---
 galaxy_info:
   role_name: vector
+  namespace: local
   author: Your Name
   description: Install and configure Vector logging agent on Rocky Linux
   license: MIT

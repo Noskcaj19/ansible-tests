@@ -3,11 +3,8 @@
 vector_version: ""
 vector_package_name: vector
 
-# Repository management
-vector_manage_repo: true
-vector_repo_baseurl: "https://repositories.timber.io/public/vector/rpm/el/$releasever/$basearch"
-vector_repo_gpgcheck: true
-vector_repo_gpgkey: "https://repositories.timber.io/public/vector/gpg.3543DB2D0A2BC4B8.key"
+# Installation method (uses official Vector installer script from sh.vector.dev)
+vector_installer_url: "https://sh.vector.dev"
 
 # Paths
 vector_config_dir: /etc/vector

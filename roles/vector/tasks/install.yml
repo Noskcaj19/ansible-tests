@@ -1,23 +1,45 @@
 ---
-- name: Add Vector repository GPG key
-  ansible.builtin.rpm_key:
-    key: "{{ vector_repo_gpgkey }}"
-    state: present
-  when: vector_manage_repo
+- name: Check if Vector is installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/vector
+  register: vector_binary
 
-- name: Configure Vector yum repository
-  ansible.builtin.yum_repository:
-    name: timber-vector
-    description: Timber Vector Repository
-    baseurl: "{{ vector_repo_baseurl }}"
-    gpgcheck: "{{ vector_repo_gpgcheck }}"
-    gpgkey: "{{ vector_repo_gpgkey }}"
-    enabled: true
-    state: present
-  when: vector_manage_repo
+- name: Get installed Vector version
+  ansible.builtin.command: /usr/local/bin/vector --version
+  register: vector_version_output
+  changed_when: false
+  when: vector_binary.stat.exists
 
-- name: Install Vector package
-  ansible.builtin.dnf:
-    name: "{{ vector_package_name }}{{ ('-' ~ vector_version) if vector_version | length > 0 else '' }}"
+- name: Set installed Vector version fact
+  ansible.builtin.set_fact:
+    vector_installed_version: "{{ vector_version_output.stdout | regex_search('vector ([0-9.]+)', '\\1') | first | default('') }}"
+  when: vector_binary.stat.exists
+
+- name: Install Vector using official installer script
+  when: not vector_binary.stat.exists or (vector_version | length > 0 and vector_installed_version != vector_version)
+  block:
+    - name: Download and run Vector installer
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          curl --proto '=https' --tlsv1.2 -sSfL {{ vector_installer_url }} | bash -s -- -y --prefix /usr/local {{ ('--version ' ~ vector_version) if vector_version | length > 0 else '' }}
+        executable: /bin/bash
+      register: vector_install_result
+      changed_when: "'Install succeeded' in vector_install_result.stdout"
+      notify: Restart vector
+
+- name: Ensure vector group exists
+  ansible.builtin.group:
+    name: "{{ vector_group }}"
+    system: true
     state: present
-  notify: Restart vector
+
+- name: Ensure vector user exists
+  ansible.builtin.user:
+    name: "{{ vector_user }}"
+    group: "{{ vector_group }}"
+    system: true
+    shell: /sbin/nologin
+    home: "{{ vector_data_dir }}"
+    create_home: false
+    state: present

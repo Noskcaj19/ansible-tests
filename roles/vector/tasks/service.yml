@@ -1,4 +1,15 @@
 ---
+- name: Deploy Vector systemd service unit
+  ansible.builtin.template:
+    src: vector.service.j2
+    dest: /etc/systemd/system/vector.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart vector
+
 - name: Ensure Vector service is enabled and started
   ansible.builtin.systemd:
     name: "{{ vector_service_name }}"
