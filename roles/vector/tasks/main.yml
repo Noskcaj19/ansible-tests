@@ -1,0 +1,24 @@
+---
+- name: Install Vector
+  ansible.builtin.import_tasks: install.yml
+  tags:
+    - vector
+    - vector_install
+
+- name: Configure Vector
+  ansible.builtin.import_tasks: configure.yml
+  tags:
+    - vector
+    - vector_configure
+
+- name: Manage Vector service
+  ansible.builtin.import_tasks: service.yml
+  tags:
+    - vector
+    - vector_service
+
+- name: Validate Vector
+  ansible.builtin.import_tasks: validate.yml
+  tags:
+    - vector
+    - vector_validate

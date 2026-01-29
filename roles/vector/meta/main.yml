@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  role_name: vector
+  author: Your Name
+  description: Install and configure Vector logging agent on Rocky Linux
+  license: MIT
+  min_ansible_version: "2.15"
+
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+        - "10"
+
+  galaxy_tags:
+    - logging
+    - observability
+    - vector
+    - monitoring
+    - syslog
+
+dependencies: []

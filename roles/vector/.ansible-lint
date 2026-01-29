@@ -1,0 +1,9 @@
+---
+skip_list:
+  - yaml
+
+warn_list:
+  - risky-file-permissions
+
+exclude_paths:
+  - molecule/

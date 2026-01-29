@@ -1,0 +1,23 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: vector
+      vars:
+        vector_sources_journald_enabled: true
+        vector_sources_docker_enabled: false
+        vector_sources_files:
+          - name: test_logs
+            include:
+              - /var/log/messages
+        vector_sinks:
+          console:
+            type: console
+            inputs:
+              - journald
+              - test_logs
+            encoding:
+              codec: json

@@ -1,0 +1,54 @@
+---
+# Vector version (empty = latest from repo)
+vector_version: ""
+vector_package_name: vector
+
+# Repository management
+vector_manage_repo: true
+vector_repo_baseurl: "https://repositories.timber.io/public/vector/rpm/el/$releasever/$basearch"
+vector_repo_gpgcheck: true
+vector_repo_gpgkey: "https://repositories.timber.io/public/vector/gpg.3543DB2D0A2BC4B8.key"
+
+# Paths
+vector_config_dir: /etc/vector
+vector_config_file: "{{ vector_config_dir }}/vector.yaml"
+vector_data_dir: /var/lib/vector
+
+# Service
+vector_user: vector
+vector_group: vector
+vector_service_name: vector
+vector_service_enabled: true
+vector_service_state: started
+
+# Sources configuration
+vector_sources_journald_enabled: true
+vector_sources_journald_units: []
+
+vector_sources_docker_enabled: false
+
+vector_sources_files: []
+# Example:
+#   - name: app_logs
+#     include:
+#       - /var/log/myapp/*.log
+#     exclude: []
+
+# Sinks configuration
+vector_sinks: {}
+# Example:
+#   elasticsearch:
+#     type: elasticsearch
+#     inputs:
+#       - journald
+#       - docker
+#     endpoints:
+#       - "https://elasticsearch:9200"
+#     bulk:
+#       index: "logs-%Y-%m-%d"
+
+# Transforms (optional processing/enrichment)
+vector_transforms: {}
+
+# Additional raw config to merge (advanced use)
+vector_config_extra: {}

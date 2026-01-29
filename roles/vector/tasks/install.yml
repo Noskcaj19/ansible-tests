@@ -1,0 +1,23 @@
+---
+- name: Add Vector repository GPG key
+  ansible.builtin.rpm_key:
+    key: "{{ vector_repo_gpgkey }}"
+    state: present
+  when: vector_manage_repo
+
+- name: Configure Vector yum repository
+  ansible.builtin.yum_repository:
+    name: timber-vector
+    description: Timber Vector Repository
+    baseurl: "{{ vector_repo_baseurl }}"
+    gpgcheck: "{{ vector_repo_gpgcheck }}"
+    gpgkey: "{{ vector_repo_gpgkey }}"
+    enabled: true
+    state: present
+  when: vector_manage_repo
+
+- name: Install Vector package
+  ansible.builtin.dnf:
+    name: "{{ vector_package_name }}{{ ('-' ~ vector_version) if vector_version | length > 0 else '' }}"
+    state: present
+  notify: Restart vector

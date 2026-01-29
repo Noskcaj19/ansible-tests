@@ -1,0 +1,61 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Check Vector package is installed
+      ansible.builtin.package:
+        name: vector
+        state: present
+      check_mode: true
+      register: _pkg_check
+
+    - name: Verify package installation
+      ansible.builtin.assert:
+        that:
+          - not _pkg_check.changed
+        fail_msg: "Vector package is not installed"
+
+    - name: Check Vector service is running
+      ansible.builtin.systemd:
+        name: vector
+        state: started
+        enabled: true
+      check_mode: true
+      register: _svc_check
+
+    - name: Verify service status
+      ansible.builtin.assert:
+        that:
+          - not _svc_check.changed
+        fail_msg: "Vector service is not running or not enabled"
+
+    - name: Check configuration file exists
+      ansible.builtin.stat:
+        path: /etc/vector/vector.yaml
+      register: _config_stat
+
+    - name: Verify configuration file
+      ansible.builtin.assert:
+        that:
+          - _config_stat.stat.exists
+          - _config_stat.stat.isreg
+        fail_msg: "Configuration file is missing"
+
+    - name: Validate Vector configuration
+      ansible.builtin.command:
+        cmd: vector validate --config /etc/vector/vector.yaml
+      register: _validation_result
+      changed_when: false
+
+    - name: Verify Vector binary works
+      ansible.builtin.command:
+        cmd: vector --version
+      register: _version_result
+      changed_when: false
+
+    - name: Display Vector version
+      ansible.builtin.debug:
+        msg: "Vector installed: {{ _version_result.stdout }}"

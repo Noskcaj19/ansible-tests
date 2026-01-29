@@ -1,0 +1,14 @@
+---
+- name: Check Vector service is active
+  ansible.builtin.systemd:
+    name: "{{ vector_service_name }}"
+    state: started
+  check_mode: true
+  register: _vector_service_status
+  failed_when: _vector_service_status.changed
+  when: vector_service_state == 'started'
+
+- name: Verify Vector can parse its configuration
+  ansible.builtin.command:
+    cmd: "vector validate --config {{ vector_config_file }}"
+  changed_when: false
