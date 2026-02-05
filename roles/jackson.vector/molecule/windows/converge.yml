@@ -14,4 +14,4 @@
           codec: json
 
   roles:
-    - role: vector
+    - role: jackson.vector
