@@ -34,6 +34,10 @@ sources:
 {% endif %}
 {% endfor %}
 
+{% if vector_sources_extra | length > 0 %}
+{{ vector_sources_extra | to_nice_yaml(indent=2) | indent(2, first=true) }}
+{% endif %}
+
 {% if vector_transforms | length > 0 %}
 transforms:
 {{ vector_transforms | to_nice_yaml(indent=2) | indent(2, first=true) }}

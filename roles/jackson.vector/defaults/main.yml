@@ -32,6 +32,13 @@ vector_sources_files: []
 #       - /var/log/myapp/*.log
 #     exclude: []
 
+# Additional raw sources to merge (advanced use)
+vector_sources_extra: {}
+# Example:
+#   my_custom_source:
+#     type: http_server
+#     address: "0.0.0.0:8080"
+
 # Sinks configuration
 vector_sinks: {}
 # Example:
