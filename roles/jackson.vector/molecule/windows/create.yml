@@ -1,0 +1,57 @@
+---
+- name: Create
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  no_log: "{{ molecule_no_log }}"
+  tasks:
+    - name: Create Vagrantfile
+      ansible.builtin.template:
+        src: "{{ molecule_scenario_directory }}/Vagrantfile.j2"
+        dest: "{{ molecule_ephemeral_directory }}/Vagrantfile"
+        mode: "0600"
+
+    - name: Create molecule instance(s)
+      ansible.builtin.command:
+        cmd: vagrant up --provider=libvirt
+        chdir: "{{ molecule_ephemeral_directory }}"
+      register: vagrant_up
+      changed_when: vagrant_up.rc == 0
+
+    - name: Get vagrant WinRM info
+      ansible.builtin.command:
+        cmd: vagrant winrm-config
+        chdir: "{{ molecule_ephemeral_directory }}"
+      register: winrm_config
+      changed_when: false
+      failed_when: false
+
+    - name: Get vagrant SSH config as fallback
+      ansible.builtin.command:
+        cmd: vagrant ssh-config
+        chdir: "{{ molecule_ephemeral_directory }}"
+      register: ssh_config
+      changed_when: false
+      when: winrm_config.rc != 0
+
+    - name: Parse host address from config
+      ansible.builtin.set_fact:
+        vagrant_host: >-
+          {{ (winrm_config.stdout | default(ssh_config.stdout | default('')))
+             | regex_search('HostName\s+(.+)', '\1') | first | default('127.0.0.1') }}
+
+    - name: Populate instance config
+      ansible.builtin.set_fact:
+        instance_conf:
+          - instance: "{{ molecule_yml.platforms[0].name }}"
+            address: "{{ vagrant_host | trim }}"
+            user: "{{ molecule_yml.provisioner.connection_options.ansible_user | default('vagrant') }}"
+            port: "5985"
+            identity_file: ""
+            connection: winrm
+
+    - name: Dump instance config
+      ansible.builtin.copy:
+        content: "{{ instance_conf | to_json | from_json | to_yaml }}"
+        dest: "{{ molecule_instance_config }}"
+        mode: "0600"

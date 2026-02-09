@@ -7,11 +7,14 @@ dependency:
 driver:
   name: vagrant
   provider:
-    name: virtualbox
+    name: libvirt
+  options:
+    create: create.yml
+    destroy: destroy.yml
 
 platforms:
   - name: windows2022
-    box: gusztavvargadr/windows-server-2022-standard
+    box: peru/windows-server-2022-standard-x64-eval
     memory: 4096
     cpus: 2
     groups:
@@ -20,6 +23,7 @@ platforms:
 provisioner:
   name: ansible
   playbooks:
+    prepare: prepare.yml
     converge: converge.yml
     verify: verify.yml
   connection_options:

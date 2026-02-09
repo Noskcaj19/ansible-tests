@@ -2,6 +2,8 @@
 ---
 data_dir: {{ vector_data_dir }}
 
+{% set _has_sources = vector_sources_journald_enabled or vector_sources_docker_enabled or (vector_sources_files | length > 0) or (vector_sources_extra | length > 0) %}
+{% if _has_sources %}
 sources:
 {% if vector_sources_journald_enabled %}
   journald:
@@ -36,6 +38,7 @@ sources:
 
 {% if vector_sources_extra | length > 0 %}
 {{ vector_sources_extra | to_nice_yaml(indent=2) | indent(2, first=true) }}
+{% endif %}
 {% endif %}
 
 {% if vector_transforms | length > 0 %}
