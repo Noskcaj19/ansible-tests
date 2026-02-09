@@ -1,0 +1,21 @@
+---
+- name: Create Docker service drop-in directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: base_server_http_proxy | length > 0 or base_server_https_proxy | length > 0
+
+- name: Configure Docker daemon HTTP proxy
+  ansible.builtin.template:
+    src: docker-http-proxy.conf.j2
+    dest: /etc/systemd/system/docker.service.d/http-proxy.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: base_server_http_proxy | length > 0 or base_server_https_proxy | length > 0
+  notify:
+    - Reload systemd
+    - Restart docker

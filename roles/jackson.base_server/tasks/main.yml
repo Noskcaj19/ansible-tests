@@ -1,0 +1,28 @@
+---
+- name: Configure HTTP proxy environment
+  ansible.builtin.include_tasks:
+    file: proxy.yml
+  tags:
+    - base_server
+    - base_server_proxy
+
+- name: Configure CA certificate
+  ansible.builtin.include_tasks:
+    file: ca_cert.yml
+  tags:
+    - base_server
+    - base_server_ca_cert
+
+- name: Configure Docker daemon proxy
+  ansible.builtin.include_tasks:
+    file: docker_proxy.yml
+  tags:
+    - base_server
+    - base_server_docker_proxy
+
+- name: Configure CIFS mount
+  ansible.builtin.include_tasks:
+    file: cifs.yml
+  tags:
+    - base_server
+    - base_server_cifs

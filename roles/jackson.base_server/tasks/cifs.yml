@@ -1,0 +1,33 @@
+---
+- name: Install cifs-utils
+  ansible.builtin.dnf:
+    name: cifs-utils
+    state: present
+  when: base_server_cifs_share | length > 0
+
+- name: Create CIFS credentials file
+  ansible.builtin.template:
+    src: cifs-credentials.j2
+    dest: /etc/cifs-credentials
+    owner: root
+    group: root
+    mode: "0600"
+  when: base_server_cifs_share | length > 0
+
+- name: Ensure CIFS mount point exists
+  ansible.builtin.file:
+    path: "{{ base_server_cifs_mount_point }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: base_server_cifs_share | length > 0
+
+- name: Mount CIFS share
+  ansible.posix.mount:
+    src: "{{ base_server_cifs_share }}"
+    path: "{{ base_server_cifs_mount_point }}"
+    fstype: cifs
+    opts: "credentials=/etc/cifs-credentials,{{ base_server_cifs_options }}"
+    state: mounted
+  when: base_server_cifs_share | length > 0

@@ -1,0 +1,8 @@
+---
+- name: Configure system-wide proxy environment variables
+  ansible.builtin.template:
+    src: environment.j2
+    dest: /etc/environment
+    owner: root
+    group: root
+    mode: "0644"

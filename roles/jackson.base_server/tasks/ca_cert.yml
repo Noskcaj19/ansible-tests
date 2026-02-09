@@ -1,0 +1,10 @@
+---
+- name: Download CA certificate
+  ansible.builtin.get_url:
+    url: "{{ base_server_ca_cert_url }}"
+    dest: "/etc/pki/ca-trust/source/anchors/{{ base_server_ca_cert_filename }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: base_server_ca_cert_url | length > 0
+  notify: Update CA trust

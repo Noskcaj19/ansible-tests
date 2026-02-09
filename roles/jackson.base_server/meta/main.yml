@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  role_name: base_server
+  namespace: jackson
+  author: Your Name
+  description: Base server configuration including proxy, CA certificates, and CIFS mounts
+  license: MIT
+  min_ansible_version: "2.15"
+
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+        - "10"
+
+  galaxy_tags:
+    - system
+    - proxy
+    - certificate
+    - cifs
+    - base
+
+dependencies: []
