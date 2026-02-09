@@ -1,0 +1,14 @@
+---
+- name: Check windows_exporter service is running
+  ansible.windows.win_service_info:
+    name: "{{ windows_exporter_service_name }}"
+  register: _windows_exporter_service_status
+  failed_when:
+    - windows_exporter_service_state == 'started'
+    - _windows_exporter_service_status.services[0].state != 'started'
+
+- name: Verify windows_exporter binary version
+  ansible.windows.win_command:
+    cmd: '"{{ windows_exporter_binary_path }}" --version'
+  changed_when: false
+  failed_when: false

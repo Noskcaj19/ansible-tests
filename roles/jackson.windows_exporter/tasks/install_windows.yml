@@ -1,0 +1,72 @@
+---
+- name: Validate windows_exporter_version is set
+  ansible.builtin.assert:
+    that:
+      - windows_exporter_version | length > 0
+    fail_msg: "windows_exporter_version is required (MSI URL needs explicit version)"
+
+- name: Check if windows_exporter is installed
+  ansible.windows.win_stat:
+    path: "{{ windows_exporter_binary_path }}"
+  register: _windows_exporter_binary
+
+- name: Get installed windows_exporter version
+  ansible.windows.win_command:
+    cmd: '"{{ windows_exporter_binary_path }}" --version'
+  register: _windows_exporter_version_output
+  changed_when: false
+  failed_when: false
+  when: _windows_exporter_binary.stat.exists
+
+- name: Set installed version fact
+  ansible.builtin.set_fact:
+    _windows_exporter_installed_version: >-
+      {{ _windows_exporter_version_output.stderr
+         | default(_windows_exporter_version_output.stdout | default(''))
+         | regex_search('version ([0-9.]+)', '\1')
+         | first
+         | default('') }}
+  when: _windows_exporter_binary.stat.exists
+
+- name: Install windows_exporter
+  when: not _windows_exporter_binary.stat.exists or _windows_exporter_installed_version != windows_exporter_version
+  block:
+    - name: Ensure temp directory exists
+      ansible.windows.win_file:
+        path: "{{ ansible_env.TEMP }}\\windows_exporter"
+        state: directory
+
+    - name: Set MSI filename
+      ansible.builtin.set_fact:
+        _windows_exporter_msi_filename: "windows_exporter-{{ windows_exporter_version }}-{{ windows_exporter_arch }}.msi"
+
+    - name: Download windows_exporter MSI
+      ansible.windows.win_get_url:
+        url: "{{ windows_exporter_download_base_url }}/v{{ windows_exporter_version }}/{{ _windows_exporter_msi_filename }}"
+        dest: "{{ ansible_env.TEMP }}\\windows_exporter\\{{ _windows_exporter_msi_filename }}"
+      register: _windows_exporter_msi_download
+
+    - name: Build MSI arguments
+      ansible.builtin.set_fact:
+        _windows_exporter_msi_args: >-
+          ENABLED_COLLECTORS={{ windows_exporter_collectors_enabled | join(',') }}
+          LISTEN_PORT={{ windows_exporter_listen_port }}
+          {% if windows_exporter_listen_addr | length > 0 %}LISTEN_ADDR={{ windows_exporter_listen_addr }}{% endif %}
+          METRICS_PATH={{ windows_exporter_metrics_path }}
+          {% if windows_exporter_textfile_dirs | length > 0 %}TEXTFILE_DIRS={{ windows_exporter_textfile_dirs | join(',') }}{% endif %}
+          {% if windows_exporter_firewall_enabled %}ADDLOCAL=FirewallException{% else %}REMOVE=FirewallException{% endif %}
+          {% if windows_exporter_firewall_remote_addr | length > 0 %}REMOTE_ADDR={{ windows_exporter_firewall_remote_addr }}{% endif %}
+          {% if windows_exporter_extra_flags | length > 0 %}EXTRA_FLAGS={{ windows_exporter_extra_flags }}{% endif %}
+
+    - name: Install windows_exporter MSI
+      ansible.windows.win_package:
+        path: "{{ _windows_exporter_msi_download.dest }}"
+        arguments: "{{ _windows_exporter_msi_args }}"
+        state: present
+      register: _windows_exporter_install_result
+      notify: Restart windows_exporter
+
+    - name: Clean up MSI installer
+      ansible.windows.win_file:
+        path: "{{ ansible_env.TEMP }}\\windows_exporter"
+        state: absent

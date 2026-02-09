@@ -1,0 +1,4 @@
+---
+windows_exporter_install_dir: "C:\\Program Files\\windows_exporter"
+windows_exporter_binary_path: "{{ windows_exporter_install_dir }}\\windows_exporter.exe"
+windows_exporter_config_file: "{{ windows_exporter_install_dir }}\\config.yml"

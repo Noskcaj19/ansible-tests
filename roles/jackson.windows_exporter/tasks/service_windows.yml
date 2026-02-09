@@ -1,0 +1,17 @@
+---
+- name: Check windows_exporter service exists
+  ansible.windows.win_service_info:
+    name: "{{ windows_exporter_service_name }}"
+  register: _windows_exporter_service_info
+
+- name: Verify service was created by MSI
+  ansible.builtin.assert:
+    that:
+      - _windows_exporter_service_info.exists
+    fail_msg: "windows_exporter service does not exist. MSI installation may have failed."
+
+- name: Ensure windows_exporter service is configured
+  ansible.windows.win_service:
+    name: "{{ windows_exporter_service_name }}"
+    start_mode: "{{ 'auto' if windows_exporter_service_enabled else 'disabled' }}"
+    state: "{{ windows_exporter_service_state }}"

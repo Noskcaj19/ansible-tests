@@ -1,0 +1,8 @@
+---
+- name: Restart windows_exporter (Windows)
+  ansible.windows.win_service:
+    name: "{{ windows_exporter_service_name }}"
+    state: restarted
+  when:
+    - windows_exporter_service_state != 'stopped'
+  listen: Restart windows_exporter

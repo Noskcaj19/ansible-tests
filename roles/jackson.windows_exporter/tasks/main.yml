@@ -1,0 +1,44 @@
+---
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_os_family }}.yml"
+        - "default.yml"
+      paths:
+        - "{{ role_path }}/vars"
+      skip: true
+
+- name: Fail if not Windows
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family == "Windows"
+    fail_msg: "jackson.windows_exporter is a Windows-only role."
+
+- name: Install windows_exporter
+  ansible.builtin.include_tasks:
+    file: install_windows.yml
+  tags:
+    - windows_exporter
+    - windows_exporter_install
+
+- name: Configure windows_exporter
+  ansible.builtin.include_tasks:
+    file: configure_windows.yml
+  tags:
+    - windows_exporter
+    - windows_exporter_configure
+
+- name: Manage windows_exporter service
+  ansible.builtin.include_tasks:
+    file: service_windows.yml
+  tags:
+    - windows_exporter
+    - windows_exporter_service
+
+- name: Validate windows_exporter
+  ansible.builtin.include_tasks:
+    file: validate_windows.yml
+  tags:
+    - windows_exporter
+    - windows_exporter_validate

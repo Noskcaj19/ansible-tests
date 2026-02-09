@@ -1,0 +1,61 @@
+---
+- name: Ensure install directory exists
+  ansible.windows.win_file:
+    path: "{{ windows_exporter_install_dir }}"
+    state: directory
+
+- name: Ensure textfile directories exist
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop: "{{ windows_exporter_textfile_dirs }}"
+  when: windows_exporter_textfile_dirs | length > 0
+
+- name: Deploy YAML configuration file
+  ansible.windows.win_template:
+    src: windows_exporter_config.yml.j2
+    dest: "{{ windows_exporter_config_file }}"
+  notify: Restart windows_exporter
+  when: windows_exporter_config_enabled
+
+- name: Remove YAML configuration file when not enabled
+  ansible.windows.win_file:
+    path: "{{ windows_exporter_config_file }}"
+    state: absent
+  when: not windows_exporter_config_enabled
+
+- name: Build desired service flags
+  ansible.builtin.set_fact:
+    _windows_exporter_desired_flags: >-
+      --log.file={{ windows_exporter_log_output }}
+      --web.listen-address={{ _windows_exporter_listen_address | trim }}
+      --telemetry.path={{ windows_exporter_metrics_path }}
+      --collectors.enabled={{ windows_exporter_collectors_enabled | join(',') }}
+      {% if windows_exporter_textfile_dirs | length > 0 %}--collector.textfile.directories={{ windows_exporter_textfile_dirs | join(',') }}{% endif %}
+      {% if windows_exporter_config_enabled %}--config.file="{{ windows_exporter_config_file }}"{% endif %}
+      {% if windows_exporter_extra_flags | length > 0 %}{{ windows_exporter_extra_flags }}{% endif %}
+
+- name: Build desired ImagePath
+  ansible.builtin.set_fact:
+    _windows_exporter_desired_image_path: >-
+      "{{ windows_exporter_binary_path }}" {{ _windows_exporter_desired_flags | trim }}
+
+- name: Get current service ImagePath
+  ansible.windows.win_shell: |
+    (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Services\{{ windows_exporter_service_name }}' -ErrorAction SilentlyContinue).ImagePath
+  register: _windows_exporter_current_image_path
+  changed_when: false
+  failed_when: false
+
+- name: Normalize paths for comparison
+  ansible.builtin.set_fact:
+    _windows_exporter_current_normalized: "{{ _windows_exporter_current_image_path.stdout | default('') | trim }}"
+    _windows_exporter_desired_normalized: "{{ _windows_exporter_desired_image_path | trim }}"
+
+- name: Update service configuration
+  ansible.windows.win_command:
+    cmd: >-
+      sc.exe config {{ windows_exporter_service_name }}
+      binPath= "{{ _windows_exporter_desired_normalized }}"
+  when: _windows_exporter_current_normalized != _windows_exporter_desired_normalized
+  notify: Restart windows_exporter

@@ -1,0 +1,41 @@
+---
+# Version (required - MSI URL needs explicit version)
+windows_exporter_version: ""
+
+# Architecture
+windows_exporter_arch: "amd64"
+
+# Download URL base
+windows_exporter_download_base_url: "https://github.com/prometheus-community/windows_exporter/releases/download"
+
+# Service
+windows_exporter_service_name: "windows_exporter"
+windows_exporter_service_enabled: true
+windows_exporter_service_state: started
+
+# Listen address and port
+windows_exporter_listen_addr: ""
+windows_exporter_listen_port: 9182
+windows_exporter_metrics_path: "/metrics"
+
+# Collectors
+# Use "[defaults]" to track upstream defaults (cpu, memory, net, logical_disk, physical_disk, os, service, system)
+windows_exporter_collectors_enabled:
+  - "[defaults]"
+
+# Textfile collector directories
+windows_exporter_textfile_dirs: []
+
+# YAML config file for advanced collector settings
+windows_exporter_config_enabled: false
+windows_exporter_config: {}
+
+# Logging
+windows_exporter_log_output: "eventlog"
+
+# Extra CLI flags (advanced, user responsible for quoting)
+windows_exporter_extra_flags: ""
+
+# Firewall
+windows_exporter_firewall_enabled: true
+windows_exporter_firewall_remote_addr: ""

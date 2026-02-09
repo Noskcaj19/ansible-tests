@@ -1,0 +1,6 @@
+---
+# Internal variables
+_windows_exporter_listen_address: >-
+  {{ (windows_exporter_listen_addr ~ ':' ~ windows_exporter_listen_port)
+     if (windows_exporter_listen_addr | length > 0)
+     else (':' ~ windows_exporter_listen_port) }}
