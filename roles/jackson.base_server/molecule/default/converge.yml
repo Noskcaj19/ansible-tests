@@ -1,0 +1,15 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: jackson.base_server
+      vars:
+        base_server_http_proxy: "http://proxy.example.com:8080"
+        base_server_https_proxy: "http://proxy.example.com:8443"
+        base_server_no_proxy: "localhost,127.0.0.1,.example.com"
+        base_server_ca_cert_url: ""
+        base_server_vas_realm: "EXAMPLE.COM"
+        base_server_cifs_share: ""

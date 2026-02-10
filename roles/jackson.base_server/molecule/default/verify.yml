@@ -1,0 +1,135 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Check /etc/environment exists
+      ansible.builtin.stat:
+        path: /etc/environment
+      register: _env_stat
+
+    - name: Verify /etc/environment file
+      ansible.builtin.assert:
+        that:
+          - _env_stat.stat.exists
+          - _env_stat.stat.isreg
+        fail_msg: "/etc/environment does not exist"
+
+    - name: Read /etc/environment
+      ansible.builtin.slurp:
+        src: /etc/environment
+      register: _env_content
+
+    - name: Verify proxy variables in /etc/environment
+      ansible.builtin.assert:
+        that:
+          - "'http_proxy=http://proxy.example.com:8080' in _env_decoded"
+          - "'https_proxy=http://proxy.example.com:8443' in _env_decoded"
+          - "'no_proxy=localhost,127.0.0.1,.example.com' in _env_decoded"
+          - "'HTTP_PROXY=http://proxy.example.com:8080' in _env_decoded"
+          - "'HTTPS_PROXY=http://proxy.example.com:8443' in _env_decoded"
+          - "'NO_PROXY=localhost,127.0.0.1,.example.com' in _env_decoded"
+          - "'ALL_PROXY=http://proxy.example.com:8080' in _env_decoded"
+        fail_msg: "Proxy variables not correctly set in /etc/environment"
+      vars:
+        _env_decoded: "{{ _env_content.content | b64decode }}"
+
+    - name: Verify CA bundle variables are absent when ca_cert_url is empty
+      ansible.builtin.assert:
+        that:
+          - "'AWS_CA_BUNDLE' not in _env_decoded"
+          - "'PIP_CERT' not in _env_decoded"
+          - "'REQUESTS_CA_BUNDLE' not in _env_decoded"
+          - "'CURL_CA_BUNDLE' not in _env_decoded"
+          - "'GIT_SSL_CAINFO' not in _env_decoded"
+          - "'SSL_CERT_FILE' not in _env_decoded"
+        fail_msg: "CA bundle variables should not be present when ca_cert_url is empty"
+      vars:
+        _env_decoded: "{{ _env_content.content | b64decode }}"
+
+    - name: Check Docker proxy drop-in directory exists
+      ansible.builtin.stat:
+        path: /etc/systemd/system/docker.service.d
+      register: _docker_dropin_dir
+
+    - name: Verify Docker proxy drop-in directory
+      ansible.builtin.assert:
+        that:
+          - _docker_dropin_dir.stat.exists
+          - _docker_dropin_dir.stat.isdir
+        fail_msg: "Docker proxy drop-in directory does not exist"
+
+    - name: Check Docker proxy config exists
+      ansible.builtin.stat:
+        path: /etc/systemd/system/docker.service.d/http-proxy.conf
+      register: _docker_proxy_stat
+
+    - name: Verify Docker proxy config file
+      ansible.builtin.assert:
+        that:
+          - _docker_proxy_stat.stat.exists
+          - _docker_proxy_stat.stat.isreg
+        fail_msg: "Docker proxy config does not exist"
+
+    - name: Read Docker proxy config
+      ansible.builtin.slurp:
+        src: /etc/systemd/system/docker.service.d/http-proxy.conf
+      register: _docker_proxy_content
+
+    - name: Verify Docker proxy config content
+      ansible.builtin.assert:
+        that:
+          - "'HTTP_PROXY=http://proxy.example.com:8080' in _proxy_decoded"
+          - "'HTTPS_PROXY=http://proxy.example.com:8443' in _proxy_decoded"
+          - "'NO_PROXY=localhost,127.0.0.1,.example.com' in _proxy_decoded"
+        fail_msg: "Docker proxy config does not contain expected values"
+      vars:
+        _proxy_decoded: "{{ _docker_proxy_content.content | b64decode }}"
+
+    - name: Check VAS configuration directory exists
+      ansible.builtin.stat:
+        path: /etc/opt/quest/vas
+      register: _vas_dir
+
+    - name: Verify VAS directory
+      ansible.builtin.assert:
+        that:
+          - _vas_dir.stat.exists
+          - _vas_dir.stat.isdir
+        fail_msg: "VAS configuration directory does not exist"
+
+    - name: Check vas.conf exists
+      ansible.builtin.stat:
+        path: /etc/opt/quest/vas/vas.conf
+      register: _vas_conf_stat
+
+    - name: Verify vas.conf file
+      ansible.builtin.assert:
+        that:
+          - _vas_conf_stat.stat.exists
+          - _vas_conf_stat.stat.isreg
+        fail_msg: "vas.conf does not exist"
+
+    - name: Verify CIFS resources are not created when cifs_share is empty
+      ansible.builtin.stat:
+        path: /etc/cifs-credentials
+      register: _cifs_cred_stat
+
+    - name: Assert CIFS credentials file does not exist
+      ansible.builtin.assert:
+        that:
+          - not _cifs_cred_stat.stat.exists
+        fail_msg: "CIFS credentials file should not exist when cifs_share is empty"
+
+    - name: Verify CA cert not downloaded when ca_cert_url is empty
+      ansible.builtin.stat:
+        path: /etc/pki/ca-trust/source/anchors/custom-ca.crt
+      register: _ca_cert_stat
+
+    - name: Assert CA cert does not exist
+      ansible.builtin.assert:
+        that:
+          - not _ca_cert_stat.stat.exists
+        fail_msg: "CA cert should not exist when ca_cert_url is empty"
