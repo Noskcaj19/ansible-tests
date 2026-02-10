@@ -6,8 +6,8 @@
  default_etypes = aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 arcfour-hmac-md5
 
 [domain_realm]
- {{ ansible_fqdn }} = {{ base_server_vas_realm }}
- #.{{ ansible_domain }} = {{ base_server_vas_realm }}
+ {{ ansible_facts['fqdn'] }} = {{ base_server_vas_realm }}
+ #.{{ ansible_facts['domain'] }} = {{ base_server_vas_realm }}
 
 
 [libvas]
