@@ -1,0 +1,18 @@
+---
+- name: Ensure VAS configuration directory exists
+  ansible.builtin.file:
+    path: /etc/opt/quest/vas
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: base_server_vas_realm | length > 0
+
+- name: Configure vas.conf
+  ansible.builtin.template:
+    src: vas.conf.j2
+    dest: /etc/opt/quest/vas/vas.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: base_server_vas_realm | length > 0

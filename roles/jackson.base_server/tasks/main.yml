@@ -20,6 +20,13 @@
     - base_server
     - base_server_docker_proxy
 
+- name: Configure VAS
+  ansible.builtin.include_tasks:
+    file: vas.yml
+  tags:
+    - base_server
+    - base_server_vas
+
 - name: Configure CIFS mount
   ansible.builtin.include_tasks:
     file: cifs.yml
