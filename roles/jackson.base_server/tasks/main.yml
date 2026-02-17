@@ -36,6 +36,7 @@
 - name: Configure CIFS mount
   ansible.builtin.include_tasks:
     file: cifs.yml
+  when: base_server_cifs_share | length > 0
   tags:
     - base_server
     - base_server_cifs
