@@ -13,6 +13,12 @@
     - base_server
     - base_server_ca_cert
 
+- name: Flush handlers to update CA trust immediately
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - base_server
+    - base_server_ca_cert
+
 - name: Configure Docker daemon proxy
   ansible.builtin.include_tasks:
     file: docker_proxy.yml
