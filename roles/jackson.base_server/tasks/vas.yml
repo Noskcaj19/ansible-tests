@@ -19,7 +19,7 @@
 
 - name: Configure users.allow
   ansible.builtin.copy:
-    content: "{{ base_server_vas_users_allow }}"
+    content: "# Do not edit directly. Managed by Ansible\n{{ base_server_vas_users_allow }}"
     dest: /etc/opt/quest/vas/users.allow
     owner: root
     group: root
