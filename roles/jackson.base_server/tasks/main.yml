@@ -39,3 +39,10 @@
   tags:
     - base_server
     - base_server_cifs
+
+- name: Configure Kerberos
+  ansible.builtin.include_tasks:
+    file: krb.yml
+  tags:
+    - base_server
+    - base_server_krb
