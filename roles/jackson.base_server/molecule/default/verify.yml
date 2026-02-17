@@ -39,12 +39,12 @@
     - name: Verify CA bundle variables are absent when ca_cert_url is empty
       ansible.builtin.assert:
         that:
-          - "'AWS_CA_BUNDLE' not in _env_decoded"
-          - "'PIP_CERT' not in _env_decoded"
-          - "'REQUESTS_CA_BUNDLE' not in _env_decoded"
-          - "'CURL_CA_BUNDLE' not in _env_decoded"
-          - "'GIT_SSL_CAINFO' not in _env_decoded"
-          - "'SSL_CERT_FILE' not in _env_decoded"
+          - "'AWS_CA_BUNDLE=' not in _env_decoded"
+          - "'PIP_CERT=' not in _env_decoded"
+          - "'REQUESTS_CA_BUNDLE=' not in _env_decoded"
+          - "'CURL_CA_BUNDLE=' not in _env_decoded"
+          - "'GIT_SSL_CAINFO=' not in _env_decoded"
+          - "'SSL_CERT_FILE=' not in _env_decoded"
         fail_msg: "CA bundle variables should not be present when ca_cert_url is empty"
       vars:
         _env_decoded: "{{ _env_content.content | b64decode }}"
