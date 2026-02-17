@@ -1,6 +1,6 @@
 ---
 base_server_http_proxy: ""
-base_server_https_proxy: ""
+base_server_https_proxy: "{{ base_server_http_proxy }}"
 base_server_no_proxy: ""
 
 base_server_ca_cert_url: ""

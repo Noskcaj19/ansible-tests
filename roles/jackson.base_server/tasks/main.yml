@@ -1,7 +1,7 @@
 ---
 - name: Configure HTTP proxy environment
   ansible.builtin.include_tasks:
-    file: proxy.yml
+    file: proxy_env.yml
   tags:
     - base_server
     - base_server_proxy

@@ -1,0 +1,18 @@
+---
+- name: Configure system-wide proxy environment variables
+  ansible.builtin.lineinfile:
+    path: /etc/environment
+    regexp: "^{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - { key: "http_proxy", value: "{{ base_server_http_proxy }}" }
+    - { key: "https_proxy", value: "{{ base_server_https_proxy }}" }
+    - { key: "no_proxy", value: "{{ base_server_no_proxy }}" }
+    - { key: "HTTP_PROXY", value: "{{ base_server_http_proxy }}" }
+    - { key: "HTTPS_PROXY", value: "{{ base_server_https_proxy }}" }
+    - { key: "NO_PROXY", value: "{{ base_server_no_proxy }}" }
+    - { key: "ALL_PROXY", value: "{{ base_server_http_proxy }}" }
