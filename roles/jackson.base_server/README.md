@@ -1,6 +1,6 @@
 # Ansible Role: Base Server
 
-Base server configuration for Rocky Linux 9 and 10, including HTTP proxy environment variables, CA certificate installation, and CIFS mount setup.
+Base server configuration for Rocky Linux 9 and 10, including HTTP proxy environment variables, Docker daemon proxy, CA certificate installation, VAS (Quest Authentication Services), CIFS mount setup, and Kerberos configuration.
 
 ## Requirements
 
@@ -10,13 +10,19 @@ Base server configuration for Rocky Linux 9 and 10, including HTTP proxy environ
 
 ## Role Variables
 
+All features are opt-in — tasks are skipped when their primary variable is left empty.
+
 ### Proxy
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `base_server_http_proxy` | `""` | HTTP proxy URL |
-| `base_server_https_proxy` | `""` | HTTPS proxy URL |
+| `base_server_https_proxy` | `"{{ base_server_http_proxy }}"` | HTTPS proxy URL (defaults to `base_server_http_proxy`) |
 | `base_server_no_proxy` | `""` | Comma-separated list of proxy exclusions |
+
+### Docker Daemon Proxy
+
+Configures a systemd drop-in for the Docker service at `/etc/systemd/system/docker.service.d/http-proxy.conf`. Applied when `base_server_http_proxy` or `base_server_https_proxy` is set. Uses the same proxy variables as above.
 
 ### CA Certificate
 
@@ -24,6 +30,25 @@ Base server configuration for Rocky Linux 9 and 10, including HTTP proxy environ
 |----------|---------|-------------|
 | `base_server_ca_cert_url` | `""` | URL to download the CA certificate from |
 | `base_server_ca_cert_filename` | `"custom-ca.crt"` | Filename for the installed certificate |
+
+When configured, the certificate is installed to `/etc/pki/ca-trust/source/anchors/` and the following environment variables are set in `/etc/environment`: `AWS_CA_BUNDLE`, `PIP_CERT`, `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`, `GIT_SSL_CAINFO`, `SSL_CERT_FILE`.
+
+### VAS (Quest Authentication Services)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `base_server_vas_realm` | `""` | Kerberos/AD realm for VAS (e.g., `EXAMPLE.COM`) |
+| `base_server_vas_users_allow` | `""` | Contents of the VAS `users.allow` file |
+
+When configured, this installs SELinux policy dependencies, configures the vasd SELinux policy, and deploys `/etc/opt/quest/vas/vas.conf` and `/etc/opt/quest/vas/users.allow`.
+
+### Kerberos
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `base_server_krb_realm` | `"{{ base_server_vas_realm }}"` | Kerberos realm (defaults to `base_server_vas_realm`) |
+
+When configured, deploys `/etc/krb.conf` with DNS-based KDC lookup.
 
 ### CIFS Mount
 
@@ -35,6 +60,18 @@ Base server configuration for Rocky Linux 9 and 10, including HTTP proxy environ
 | `base_server_cifs_password` | `""` | CIFS password |
 | `base_server_cifs_domain` | `""` | CIFS domain |
 | `base_server_cifs_options` | `"vers=3.0,uid=0,gid=0,file_mode=0644,dir_mode=0755"` | Mount options |
+
+## Tags
+
+| Tag | Description |
+|-----|-------------|
+| `base_server` | All tasks |
+| `base_server_proxy` | Proxy environment variables |
+| `base_server_ca_cert` | CA certificate installation |
+| `base_server_docker_proxy` | Docker daemon proxy |
+| `base_server_vas` | VAS configuration |
+| `base_server_cifs` | CIFS mount |
+| `base_server_krb` | Kerberos configuration |
 
 ## Example Playbook
 
@@ -50,6 +87,11 @@ Base server configuration for Rocky Linux 9 and 10, including HTTP proxy environ
 
         base_server_ca_cert_url: "https://pki.example.com/root-ca.crt"
         base_server_ca_cert_filename: "example-root-ca.crt"
+
+        base_server_vas_realm: "EXAMPLE.COM"
+        base_server_vas_users_allow: |
+          user1@EXAMPLE.COM
+          user2@EXAMPLE.COM
 
         base_server_cifs_share: "//fileserver.example.com/data"
         base_server_cifs_mount_point: "/mnt/data"
