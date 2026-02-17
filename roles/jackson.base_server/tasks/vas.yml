@@ -1,4 +1,27 @@
 ---
+- name: Install vasd SELinux policy dependencies
+  ansible.builtin.dnf:
+    name:
+      - policycoreutils-python-utils
+      - policycoreutils
+      - selinux-policy-devel
+    state: present
+  when: base_server_vas_realm | length > 0
+
+- name: Check if vasd SELinux policy is installed
+  ansible.builtin.command:
+    cmd: semodule -l
+  register: _vas_selinux_modules
+  changed_when: false
+  when: base_server_vas_realm | length > 0
+
+- name: Configure vasd SELinux policy
+  ansible.builtin.command:
+    cmd: /opt/quest/bin/vastool configure selinux
+  when:
+    - base_server_vas_realm | length > 0
+    - "'vasd' not in _vas_selinux_modules.stdout"
+
 - name: Ensure VAS configuration directory exists
   ansible.builtin.file:
     path: /etc/opt/quest/vas
