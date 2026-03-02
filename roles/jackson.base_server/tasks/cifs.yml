@@ -1,4 +1,19 @@
 ---
+- name: Verify required CIFS secrets are defined
+  ansible.builtin.assert:
+    that:
+      - lookup('vars', item) is defined
+      - lookup('vars', item) | length > 0
+    fail_msg: "Required secret '{{ item }}' is not defined or empty"
+  loop:
+    - base_server_cifs_username
+    - base_server_cifs_password
+    - base_server_cifs_domain
+  when: base_server_cifs_share | length > 0
+  tags:
+    - base_server
+    - base_server_cifs
+
 - name: Install cifs-utils
   ansible.builtin.dnf:
     name: cifs-utils
