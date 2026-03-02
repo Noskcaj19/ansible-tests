@@ -1,0 +1,9 @@
+---
+
+- name: Enable Banner in sshd
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?Banner"
+    line: "Banner /etc/banner"
+    validate: "sshd -t -f %s"
+  notify: Restart sshd

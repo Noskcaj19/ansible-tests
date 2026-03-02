@@ -47,3 +47,10 @@
   tags:
     - base_server
     - base_server_krb
+
+- name: Configure sshd
+  ansible.builtin.include_tasks:
+    file: sshd.yml
+  tags:
+    - base_server
+    - base_server_sshd
