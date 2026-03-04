@@ -18,6 +18,8 @@ vector_group: vector
 vector_service_name: vector
 vector_service_enabled: true
 vector_service_state: started
+vector_env_file: "{{ vector_config_dir }}/vector.env"
+vector_env_vars: {}
 
 # Full Vector configuration (rendered directly to vector.yaml)
 vector_config:

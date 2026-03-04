@@ -23,6 +23,18 @@
   when: vector_sources_docker_enabled
   notify: Restart vector
 
+- name: Deploy Vector environment file
+  ansible.builtin.copy:
+    dest: "{{ vector_env_file }}"
+    owner: root
+    group: "{{ vector_group }}"
+    mode: "0640"
+    content: |
+      {% for key, value in vector_env_vars.items() %}
+      {{ key }}={{ value }}
+      {% endfor %}
+  notify: Restart vector
+
 - name: Deploy Vector configuration
   ansible.builtin.template:
     src: vector.yaml.j2
