@@ -19,41 +19,6 @@ vector_service_name: vector
 vector_service_enabled: true
 vector_service_state: started
 
-# Sources configuration
-vector_sources_journald_enabled: true
-vector_sources_journald_units: []
-
-vector_sources_docker_enabled: false
-
-vector_sources_files: []
-# Example:
-#   - name: app_logs
-#     include:
-#       - /var/log/myapp/*.log
-#     exclude: []
-
-# Additional raw sources to merge (advanced use)
-vector_sources_extra: {}
-# Example:
-#   my_custom_source:
-#     type: http_server
-#     address: "0.0.0.0:8080"
-
-# Sinks configuration
-vector_sinks: {}
-# Example:
-#   elasticsearch:
-#     type: elasticsearch
-#     inputs:
-#       - journald
-#       - docker
-#     endpoints:
-#       - "https://elasticsearch:9200"
-#     bulk:
-#       index: "logs-%Y-%m-%d"
-
-# Transforms (optional processing/enrichment)
-vector_transforms: {}
-
-# Additional raw config to merge (advanced use)
-vector_config_extra: {}
+# Full Vector configuration (rendered directly to vector.yaml)
+vector_config:
+  data_dir: "{{ vector_data_dir }}"

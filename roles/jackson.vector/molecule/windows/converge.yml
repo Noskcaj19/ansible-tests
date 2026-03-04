@@ -5,16 +5,18 @@
 
   vars:
     vector_version: "0.42.0"
-    vector_sources_extra:
-      internal_metrics:
-        type: internal_metrics
-    vector_sinks:
-      console:
-        type: console
-        inputs:
-          - internal_metrics
-        encoding:
-          codec: json
+    vector_config:
+      data_dir: "C:\\Program Files\\Vector\\data"
+      sources:
+        internal_metrics:
+          type: internal_metrics
+      sinks:
+        console:
+          type: console
+          inputs:
+            - internal_metrics
+          encoding:
+            codec: json
 
   roles:
     - role: jackson.vector
