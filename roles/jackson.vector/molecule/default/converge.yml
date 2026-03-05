@@ -7,20 +7,16 @@
   roles:
     - role: jackson.vector
       vars:
-        vector_config:
-          data_dir: /var/lib/vector
-          sources:
-            journald:
-              type: journald
-            test_logs:
-              type: file
-              include:
-                - /var/log/messages
-          sinks:
-            console:
-              type: console
-              inputs:
-                - journald
-                - test_logs
-              encoding:
-                codec: json
+        vector_host_sources:
+          test_logs:
+            type: file
+            include:
+              - /var/log/messages
+        vector_sinks:
+          console:
+            type: console
+            inputs:
+              - journald
+              - test_logs
+            encoding:
+              codec: json

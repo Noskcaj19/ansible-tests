@@ -1,2 +1,31 @@
 # {{ ansible_managed }}
-{{ vector_config | to_nice_yaml }}
+data_dir: {{ vector_data_dir }}
+
+sources:
+{% if ansible_os_family == 'Windows' %}
+# TODO: Wait for vector support
+#  windows_event_log:
+#    type: windows_event_log
+{% else %}
+{% if vector_sources_journald_enabled | default(true) %}
+  journald:
+    type: journald
+{% endif %}
+{% if vector_sources_docker_enabled | default(false) %}
+  docker_logs:
+    type: docker_logs
+{% endif %}
+{% endif %}
+{% if vector_host_sources is defined %}
+{{ vector_host_sources | to_nice_yaml | indent(2, first=true) }}
+{% endif %}
+
+{% if vector_transforms is defined %}
+transforms:
+{{ vector_transforms | to_nice_yaml | indent(2, first=true) }}
+{% endif %}
+
+{% if vector_sinks is defined %}
+sinks:
+{{ vector_sinks | to_nice_yaml | indent(2, first=true) }}
+{% endif %}

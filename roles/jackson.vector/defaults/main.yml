@@ -21,6 +21,14 @@ vector_service_state: started
 vector_env_file: "{{ vector_config_dir }}/vector.env"
 vector_env_vars: {}
 
-# Full Vector configuration (rendered directly to vector.yaml)
-vector_config:
-  data_dir: "{{ vector_data_dir }}"
+# Configuration template (override with your own template path for full control)
+vector_config_template: vector.yaml.j2
+
+# OS-specific source toggles
+vector_sources_journald_enabled: true
+vector_sources_docker_enabled: false
+
+# Host-specific config (set in host_vars/group_vars)
+# vector_host_sources: {}
+# vector_transforms: {}
+# vector_sinks: {}

@@ -11,7 +11,7 @@
 
 - name: Deploy Vector configuration
   ansible.windows.win_template:
-    src: vector.yaml.j2
+    src: "{{ vector_config_template }}"
     dest: "{{ vector_config_file }}"
   register: vector_config_deployed
   notify: Restart vector

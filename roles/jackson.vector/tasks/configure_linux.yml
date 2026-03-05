@@ -37,7 +37,7 @@
 
 - name: Deploy Vector configuration
   ansible.builtin.template:
-    src: vector.yaml.j2
+    src: "{{ vector_config_template }}"
     dest: "{{ vector_config_file }}"
     owner: root
     group: "{{ vector_group }}"
